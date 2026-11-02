@@ -1,35 +1,216 @@
 <!DOCTYPE html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DipTrace DCHXML — устранение пропусков RefDes</title>
-<style>:root{font-family:Segoe UI,Arial,sans-serif;color:#203047;background:#f4f7fb}*{box-sizing:border-box}body{margin:0 auto;max-width:1200px;padding:24px}h1{font-size:25px;margin:0 0 8px}p{line-height:1.5}.muted{color:#64748b}.panel{background:white;border:1px solid #dce3ec;border-radius:12px;padding:20px;margin:16px 0;box-shadow:0 2px 8px #14233d08}.drop{border:2px dashed #8a9dc0;border-radius:12px;padding:34px;text-align:center;cursor:pointer;background:#f7faff}.drop.over{background:#e4eefb;border-color:#2563eb}button{padding:10px 17px;border:0;border-radius:8px;background:#1c61c6;color:#fff;font-weight:600;cursor:pointer}button:disabled{background:#a7b5c8;cursor:not-allowed}button.secondary{background:#e8edf4;color:#263b57}input[type=file]{display:none}input[type=number]{width:75px;padding:7px;border:1px solid #cbd5e1;border-radius:6px}.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.chips{display:flex;flex-wrap:wrap;gap:10px}.chip{border:1px solid #dce3ec;padding:9px 12px;border-radius:7px;background:#f8fafc;user-select:none}.chip label{cursor:pointer}table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:9px;border-bottom:1px solid #e4eaf2;text-align:left}th{background:#f4f7fb;position:sticky;top:0} .scroll{max-height:420px;overflow:auto} .ok{color:#147d4b}.warn{color:#a35400}.error{color:#ad293b}.stats{display:flex;flex-wrap:wrap;gap:16px;margin:10px 0}.stats strong{font-size:20px;display:block}.small{font-size:13px}code{background:#f1f5f9;padding:1px 4px;border-radius:4px}</style><script type="text/javascript" nonce="c02669e0a9674b3d8d39c1043f9" src="//local.adguard.org?ts=1793300268477&amp;type=content-script&amp;dmn=chatgpt.com&amp;url=https%3A%2F%2Fchatgpt.com%2Fbackend-api%2Festuary%2Fcontent%3Fid%3Dfile_00000000988881f59b21df5b71329797%26fn%3DDipTrace_RefDes_Repair.html%26cd%3Dattachment%26ts%3D498139%26p%3Dfs%26cid%3D1%26sig%3D7a4d20ff1196ed6231799afc943fbf8942701a9172ba1257cc60ca5889f851f1%26v%3D0&amp;app=msedge.exe&amp;css=2&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1&amp;stealth=1&amp;st-loc&amp;st-flash&amp;st-dnt"></script><script type="text/javascript" nonce="c02669e0a9674b3d8d39c1043f9" src="//local.adguard.org?ts=1793300268477&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Popup%20Blocker&amp;type=user-script"></script></head>
-<body><h1>DipTrace — заполнение пропусков позиционных обозначений</h1><p class="muted">Автономный HTML-инструмент для файлов <code>.dchxml</code> (экспорт схемы DipTrace). Работает локально, без отправки проекта на сервер.</p>
+<html lang="ru" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DipTrace DCHXML — устранение пропусков RefDes</title>
+<style>
+:root{--bg:#f4f7fb;--fg:#203047;--muted:#64748b;--panel:#fff;--border:#dce3ec;--line:#e4eaf2;--soft:#f8fafc;--drop:#f7faff;--dropOver:#e4eefb;--accent:#1c61c6;--accentFg:#fff;--btn2:#e8edf4;--btn2Fg:#263b57;--dis:#a7b5c8;--code:#f1f5f9;--ok:#147d4b;--warn:#a35400;--err:#ad293b;--mark:#fff1b8;--input:#fff}
+[data-theme=dark]{--bg:#141a22;--fg:#dbe3ee;--muted:#93a1b5;--panel:#1c2430;--border:#2e3a4a;--line:#2a3442;--soft:#222c39;--drop:#1f2835;--dropOver:#263347;--accent:#4a8be0;--accentFg:#0d1420;--btn2:#2b3646;--btn2Fg:#d5deea;--dis:#4b5668;--code:#263140;--ok:#5cc58f;--warn:#e0a35a;--err:#ef7d8c;--mark:#5a4a12;--input:#141a22}
+*{box-sizing:border-box}
+html{background:var(--bg);color:var(--fg);font-family:Segoe UI,Arial,sans-serif}
+body{margin:0 auto;max-width:1200px;padding:24px}
+h1{font-size:25px;margin:0 0 8px}h2{font-size:19px;margin:0 0 10px}h3{font-size:16px;margin:18px 0 8px}
+p{line-height:1.5}.muted{color:var(--muted)}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;margin:16px 0}
+.drop{border:2px dashed #8a9dc0;border-radius:12px;padding:34px;text-align:center;cursor:pointer;background:var(--drop)}
+.drop.over{background:var(--dropOver);border-color:var(--accent)}
+button{padding:10px 17px;border:0;border-radius:8px;background:var(--accent);color:var(--accentFg);font-weight:600;cursor:pointer;font:inherit;font-weight:600}
+button:disabled{background:var(--dis);cursor:not-allowed}
+button.secondary{background:var(--btn2);color:var(--btn2Fg)}
+button.theme{white-space:nowrap;padding:8px 14px}
+input[type=file]{display:none}
+input[type=number]{width:85px;padding:7px;border:1px solid var(--border);border-radius:6px;background:var(--input);color:var(--fg)}
+input[type=checkbox]{accent-color:var(--accent)}
+.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{border:1px solid var(--border);padding:9px 12px;border-radius:7px;background:var(--soft);user-select:none}
+.chip label{cursor:pointer}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 9px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{background:var(--soft);position:sticky;top:0;z-index:1}
+.scroll{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.error{color:var(--err)}
+.stats{display:flex;flex-wrap:wrap;gap:22px;margin:10px 0}.stats strong{font-size:20px;display:block}.stats span{color:var(--muted);font-size:13px}
+.small{font-size:13px}
+code{background:var(--code);padding:1px 4px;border-radius:4px}
+mark{background:var(--mark);color:inherit;padding:0 2px;border-radius:3px}
+.mono{font-family:Consolas,Menlo,monospace}
+.tag{display:inline-block;font-size:12px;padding:1px 7px;border-radius:10px;border:1px solid var(--border);background:var(--soft);white-space:nowrap}
+.tag.warn{border-color:var(--warn)}
+tr.off td{opacity:.55}
+</style></head>
+<body>
+<div class="head"><div><h1>DipTrace — заполнение пропусков позиционных обозначений</h1>
+<p class="muted">Автономный HTML-инструмент для файлов <code>.dchxml</code> (экспорт схемы DipTrace). Работает локально, без отправки проекта на сервер.</p></div>
+<button type="button" class="secondary theme" id="theme" title="Переключить тему">Тёмная тема</button></div>
+
 <div class="panel"><div class="drop" id="drop"><strong>Перетащите сюда файл .dchxml</strong><p class="muted">или выберите его на компьютере</p><button type="button" id="pick">Выбрать файл</button><input id="file" type="file" accept=".dchxml,.xml,text/xml,application/xml"></div><p id="fileInfo" class="muted small"></p></div>
-<div class="panel" id="settings" hidden><h2>Настройки</h2><p>Выберите группы для устранения пропусков. Номера уплотняются в порядке возрастания: например, <code>C1,C2,C4,C7</code> → <code>C1,C2,C3,C4</code>. У многосекционных компонентов обозначение остаётся общим.</p><div class="toolbar"><button class="secondary" id="selectAll">Выбрать все, кроме NetPort</button><button class="secondary" id="selectNone">Снять выбор</button><label>Начальный номер: <input id="start" type="number" min="1" max="999999" value="1"></label></div><div id="groups" class="chips" style="margin-top:15px"></div><p class="small muted">По умолчанию исключены <code>NetPort</code>. Выбор других групп доступен вручную. Поля библиотеки компонентов не затрагиваются.</p></div>
-<div class="panel" id="results" hidden><h2>Результаты проверки</h2><div class="stats" id="stats"></div><p id="message"></p><div class="scroll"><table><thead><tr><th>Группа</th><th>Было</th><th>Станет</th><th>Размещений/секций</th></tr></thead><tbody id="changes"></tbody></table></div><div class="toolbar" style="margin-top:20px"><button id="download" disabled>Скачать исправленный DCHXML</button><button class="secondary" id="csv" disabled>Скачать протокол CSV</button></div></div>
-<div class="panel small"><strong>Важные ограничения</strong><p>Меняются только значения тегов <code>&lt;RefDes&gt;</code> внутри <code>&lt;Schematic&gt;&lt;Components&gt;</code>. XML не сериализуется заново: остальное содержимое исходного файла, порядок элементов, форматирование и идентификаторы сохраняются побайтно (за исключением изменённых обозначений). Проверяются уникальность после перенумерации и корректность XML. Перед использованием в рабочем проекте сохраните исходник и проверьте файл в DipTrace, особенно если имеются внешние ссылки на прежние RefDes или синхронизация с PCB.</p></div>
+
+<div class="panel" id="settings" hidden><h2>Настройки</h2>
+<p>Выберите группы для устранения пропусков. Номера уплотняются в порядке возрастания: например, <code>C1,C2,C4,C7</code> → <code>C1,C2,C3,C4</code>. У многосекционных компонентов обозначение остаётся общим.</p>
+<div class="toolbar"><button class="secondary" id="selectAll">Выбрать все, кроме NetPort</button><button class="secondary" id="selectNone">Снять выбор</button><label>Начальный номер: <input id="start" type="number" min="1" max="999999" value="1"></label>
+<label><input type="checkbox" id="textMode" checked> Обновлять обозначения в текстовых надписях</label></div>
+<div id="groups" class="chips" style="margin-top:15px"></div>
+<p class="small muted">В скобках: уникальных обозначений / размещений (секций). По умолчанию исключены <code>NetPort</code>. Поля библиотеки компонентов не затрагиваются.</p>
+<div id="unnumberedBox" hidden><h3>Обозначения без номера и нераспознанные</h3>
+<p class="small muted">Эти обозначения не входят ни в одну группу и не перенумеровываются. Проверьте их вручную в DipTrace.</p>
+<div class="scroll" style="max-height:240px"><table><thead><tr><th>RefDes</th><th>Тип</th><th>Секций</th><th>Компонент</th><th>Part Id</th></tr></thead><tbody id="unnumbered"></tbody></table></div></div>
+</div>
+
+<div class="panel" id="results" hidden><h2>Результаты проверки</h2><div class="stats" id="stats"></div><p id="message"></p>
+<h3>Позиционные обозначения</h3>
+<div class="scroll"><table><thead><tr><th>Группа</th><th>Было</th><th>Станет</th><th>Размещений/секций</th></tr></thead><tbody id="changes"></tbody></table></div>
+<div id="textBox"><h3>Упоминания в текстовых надписях</h3>
+<p class="small muted" id="textInfo"></p>
+<div class="toolbar small" style="margin-bottom:8px"><button class="secondary" id="textAll">Отметить все</button><button class="secondary" id="textNone">Снять все</button></div>
+<div class="scroll"><table><thead><tr><th></th><th>Где</th><th>Было</th><th>Станет</th><th>Строка надписи</th><th>Статус</th></tr></thead><tbody id="texts"></tbody></table></div></div>
+<div class="toolbar" style="margin-top:20px"><button id="download" disabled>Скачать исправленный DCHXML</button><button class="secondary" id="csv" disabled>Скачать протокол CSV</button></div></div>
+
+<div class="panel small"><strong>Важные ограничения</strong>
+<p>Меняются значения тегов <code>&lt;RefDes&gt;</code> внутри <code>&lt;Schematic&gt;&lt;Components&gt;</code> и, если включено, отмеченные упоминания в <code>&lt;TextLine&gt;</code> схемы: текстовые надписи, поля основной надписи и ячейки таблиц. Упоминание распознаётся как отдельное слово: <code>C11=12n</code>, <code>C5-C8</code>, <code>R16, R17</code>. Фрагменты вида <code>NE8FAH-C5</code> или <code>R1.5</code> помечаются как сомнительные и по умолчанию не заменяются. Значения, имена и дополнительные поля компонентов не изменяются.</p>
+<p>XML не сериализуется заново: остальное содержимое файла, порядок элементов, форматирование и идентификаторы сохраняются побайтно. Проверяются корректность XML, число секций и уникальность обозначений. Перед использованием в рабочем проекте сохраните исходник и проверьте файл в DipTrace, особенно при синхронизации с PCB.</p>
+<p class="muted">Версия 1.1</p></div>
+
 <script>
 'use strict';
-let sourceName='', sourceBytes=null, sourceText='', originalEncoding='utf-8', bom=false, discovered=[], changes=[], outputText='', valid=false;
-const $=id=>document.getElementById(id);const escapeHTML=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const decodeXML=s=>s.replace(/&(#x[0-9a-fA-F]+|#[0-9]+|amp|lt|gt|quot|apos);/g,(match,t)=>{if(t[0]==='#'){const n=t[1]==='x'?parseInt(t.slice(2),16):parseInt(t.slice(1),10);try{return String.fromCodePoint(n)}catch{return match}}return {amp:'&',lt:'<',gt:'>',quot:'"',apos:"'"}[t]||match});
+let sourceName='',sourceBytes=null,sourceText='',originalEncoding='utf-8',bom=false;
+let discovered=[],textLines=[],sheetNames=new Map(),changes=[],textResults=[],outputText='',valid=false;
+let textOff=new Set(),textOn=new Set(); // manual per-mention overrides, keyed by text offset
+const $=id=>document.getElementById(id);
+const escapeHTML=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const decodeXML=s=>s.replace(/&(#x[0-9a-fA-F]+|#[0-9]+|amp|lt|gt|quot|apos);/g,(m,t)=>{if(t[0]==='#'){const n=t[1]==='x'?parseInt(t.slice(2),16):parseInt(t.slice(1),10);try{return String.fromCodePoint(n)}catch{return m}}return {amp:'&',lt:'<',gt:'>',quot:'"',apos:"'"}[t]||m});
+const REF_RE=/^([A-Za-zА-ЯЁа-яё_]+)(\d+)$/u;
+
+/* ---------- Тема: светлая по умолчанию, выбор запоминается ---------- */
+function setTheme(t){document.documentElement.dataset.theme=t;$('theme').textContent=t==='dark'?'Светлая тема':'Тёмная тема';try{localStorage.setItem('refdesRepairTheme',t)}catch{}}
+try{setTheme(localStorage.getItem('refdesRepairTheme')==='dark'?'dark':'light')}catch{setTheme('light')}
+$('theme').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
+
+/* ---------- Кодировка: UTF-8 (с BOM или без) и UTF-16 с BOM ---------- */
 function utf16Encode(text,little){const raw=new Uint8Array(2+text.length*2);raw[0]=little?0xff:0xfe;raw[1]=little?0xfe:0xff;for(let i=0;i<text.length;i++){const n=text.charCodeAt(i),j=i*2+2;raw[j]=little?n&255:n>>8;raw[j+1]=little?n>>8:n&255}return raw}
-function parseInput(bytes){const b=new Uint8Array(bytes);bom=b.length>=3&&b[0]===239&&b[1]===187&&b[2]===191;let text;if(b.length>1&&((b[0]===255&&b[1]===254)||(b[0]===254&&b[1]===255))){originalEncoding=b[0]===255?'utf-16le':'utf-16be';text=new TextDecoder(originalEncoding,{fatal:true}).decode(b)}else{originalEncoding='utf-8';text=new TextDecoder('utf-8',{fatal:true}).decode(b)}if(text.charCodeAt(0)===0xfeff)text=text.slice(1);return text}
+function parseInput(bytes){const b=new Uint8Array(bytes);bom=b.length>=3&&b[0]===239&&b[1]===187&&b[2]===191;let text;
+ if(b.length>1&&((b[0]===255&&b[1]===254)||(b[0]===254&&b[1]===255))){originalEncoding=b[0]===255?'utf-16le':'utf-16be';text=new TextDecoder(originalEncoding,{fatal:true}).decode(b)}
+ else{originalEncoding='utf-8';text=new TextDecoder('utf-8',{fatal:true}).decode(b)}
+ if(text.charCodeAt(0)===0xfeff)text=text.slice(1);return text}
 function xmlCheck(text){const d=new DOMParser().parseFromString(text,'application/xml');if(d.querySelector('parsererror'))throw new Error('Некорректный XML: '+d.querySelector('parsererror').textContent.trim().slice(0,210));if(d.documentElement.tagName!=='Source'||d.documentElement.getAttribute('Type')!=='DipTrace-Schematic')throw new Error('Это не экспорт схемы DipTrace (Source Type="DipTrace-Schematic").');return d}
-function extract(text){const open=/<Schematic(?:\s[^>]*)?>/i.exec(text);if(!open)throw new Error('Отсутствует блок <Schematic>.');const from=open.index+open[0].length;const close=text.indexOf('</Schematic>',from);if(close<0)throw new Error('Незакрытый блок <Schematic>.');const range=text.slice(from,close);const cm=/<Components(?:\s[^>]*)?>/.exec(range);if(!cm)throw new Error('Нет <Schematic><Components>.');const cFrom=from+cm.index+cm[0].length, cTo=text.indexOf('</Components>',cFrom);if(cTo<0||cTo>close)throw new Error('Не найден конец списка компонентов схемы.');const content=text.slice(cFrom,cTo);const parts=[];const re=/<Part\b[^>]*>[\s\S]*?<\/Part>/g;let hit;while((hit=re.exec(content))!==null){const blk=hit[0],refs=[...blk.matchAll(/<RefDes(?:\s[^>]*)?>([\s\S]*?)<\/RefDes>/g)];if(refs.length!==1)throw new Error('Секция схемы содержит '+refs.length+' тегов RefDes (позиция '+hit.index+').');const ref=decodeXML(refs[0][1].trim());const match=/^([A-Za-zА-Яа-я_]+)(\d+)$/u.exec(ref);const i=cFrom+hit.index+refs[0].index+refs[0][0].indexOf('>')+1;parts.push({ref,prefix:match?match[1]:null,num:match?Number(match[2]):null,start:i,end:i+refs[0][1].length});}if(!parts.length)throw new Error('Не обнаружены размещённые компоненты с RefDes.');return parts}
-function loadFile(file){if(!file)return;sourceName=file.name;sourceBytes=null;valid=false;$('settings').hidden=true;$('results').hidden=true;$('fileInfo').textContent='Загрузка: '+file.name;file.arrayBuffer().then(buffer=>{sourceBytes=buffer;sourceText=parseInput(buffer);xmlCheck(sourceText);discovered=extract(sourceText);renderGroups();$('settings').hidden=false;$('results').hidden=false;$('fileInfo').textContent=file.name+' — '+(file.size/1024/1024).toFixed(2)+' МБ; размещений: '+discovered.length;compute();}).catch(e=>{$('fileInfo').textContent='Ошибка: '+e.message;$('fileInfo').className='error';alert(e.message)})}
-function renderGroups(){const counts=new Map();for(const p of discovered){if(p.prefix){if(!counts.has(p.prefix))counts.set(p.prefix,{parts:0,refs:new Set()});const obj=counts.get(p.prefix);obj.parts++;obj.refs.add(p.num)}}const sorted=[...counts.entries()].sort((a,b)=>a[0].localeCompare(b[0],'ru',{numeric:true}));$('groups').innerHTML=sorted.map(([p,o])=>`<span class="chip"><label><input type="checkbox" class="prefix" data-prefix="${escapeHTML(p)}" ${p.toLowerCase()==='netport'?'':'checked'}> <strong>${escapeHTML(p)}</strong> <small>(${o.refs.size} / ${o.parts})</small></label></span>`).join('');$('groups').querySelectorAll('input').forEach(c=>c.addEventListener('change',compute))}
-function compute(){valid=false;$('download').disabled=true;$('csv').disabled=true;const selected=new Set([...document.querySelectorAll('.prefix:checked')].map(x=>x.dataset.prefix)),start=Number($('start').value);try{if(!Number.isSafeInteger(start)||start<1||start>999999)throw new Error('Начальный номер должен быть целым числом от 1 до 999999.');const buckets=new Map();for(const p of discovered){if(!p.prefix||!Number.isSafeInteger(p.num)||p.num<=0)continue;if(!buckets.has(p.prefix))buckets.set(p.prefix,new Map());let n=buckets.get(p.prefix);if(!n.has(p.num))n.set(p.num,[]);n.get(p.num).push(p)}const replacements=[],results=[];for(const [prefix,numberMap] of buckets){if(!selected.has(prefix))continue;const nums=[...numberMap.keys()].sort((a,b)=>a-b);for(let j=0;j<nums.length;j++){const oldNum=nums[j],newNum=start+j;if(newNum===oldNum)continue;const oldRef=prefix+oldNum, newRef=prefix+newNum;for(const p of numberMap.get(oldNum))replacements.push({...p,newRef});results.push({prefix,oldRef,newRef,count:numberMap.get(oldNum).length})}}
-// Replace RefDes only at the exact offsets of the source text, never sequentially by name.
-replacements.sort((a,b)=>b.start-a.start);let result=sourceText;for(const x of replacements)result=result.slice(0,x.start)+x.newRef+result.slice(x.end);xmlCheck(result);
-const post=extract(result),seen=new Map();for(const p of post){if(!p.prefix)continue;const k=p.ref;if(!seen.has(k))seen.set(k,new Set());seen.get(k).add(p.num)}// Multiparts intentionally share a RefDes.
-if(post.length!==discovered.length)throw new Error('После изменения число секций изменилось.');
-const before=new Map();for(const p of discovered){const key=p.prefix||'??';if(!before.has(key))before.set(key,new Set());before.get(key).add(p.ref)}const after=new Map();for(const p of post){const key=p.prefix||'??';if(!after.has(key))after.set(key,new Set());after.get(key).add(p.ref)}for(const key of selected){if((before.get(key)?.size||0)!==(after.get(key)?.size||0))throw new Error('Коллизия обозначений в группе '+key)}
-outputText=result;changes=results;valid=true;$('download').disabled=false;$('csv').disabled=false;
-$('stats').innerHTML=`<div><strong>${discovered.length}</strong><span>размещений</span></div><div><strong>${selected.size}</strong><span>выбранных групп</span></div><div><strong>${results.length}</strong><span>переименованных обозначений</span></div><div><strong>${replacements.length}</strong><span>изменённых секций</span></div>`;
-$('message').className=results.length?'warn':'ok';$('message').textContent=results.length?'Предпросмотр. Изменённые обозначения перечислены ниже.':'Пропусков для выбранных групп нет либо номера уже последовательны.';
-$('changes').innerHTML=results.length?results.map(x=>`<tr><td>${escapeHTML(x.prefix)}</td><td>${escapeHTML(x.oldRef)}</td><td><strong>${escapeHTML(x.newRef)}</strong></td><td>${x.count}</td></tr>`).join(''):'<tr><td colspan="4">Изменений не требуется</td></tr>';
-}catch(e){$('message').className='error';$('message').textContent='Ошибка: '+e.message;$('changes').innerHTML='';$('stats').innerHTML='';}}
+
+/* ---------- Границы блоков <Schematic> и <Schematic><Components> ---------- */
+function bounds(text){const open=/<Schematic(?:\s[^>]*)?>/i.exec(text);if(!open)throw new Error('Отсутствует блок <Schematic>.');const from=open.index+open[0].length;const close=text.indexOf('</Schematic>',from);if(close<0)throw new Error('Незакрытый блок <Schematic>.');const cm=/<Components(?:\s[^>]*)?>/.exec(text.slice(from,close));if(!cm)throw new Error('Нет <Schematic><Components>.');const cFrom=from+cm.index+cm[0].length,cTo=text.indexOf('</Components>',cFrom);if(cTo<0||cTo>close)throw new Error('Не найден конец списка компонентов схемы.');return {from,close,cFrom,cTo}}
+
+/* ---------- Размещения (Part) и их RefDes с точными смещениями ---------- */
+function extract(text){const {cFrom,cTo}=bounds(text);const content=text.slice(cFrom,cTo);const parts=[];const re=/<Part\b([^>]*)>[\s\S]*?<\/Part>/g;let hit;
+ while((hit=re.exec(content))!==null){const blk=hit[0],refs=[...blk.matchAll(/<RefDes(?:\s[^>]*)?>([\s\S]*?)<\/RefDes>/g)];if(refs.length!==1)throw new Error('Секция схемы содержит '+refs.length+' тегов RefDes (позиция '+hit.index+').');
+  const ref=decodeXML(refs[0][1].trim());const m=REF_RE.exec(ref);const i=cFrom+hit.index+refs[0].index+refs[0][0].indexOf('>')+1;
+  const id=(/\bId="([^"]*)"/.exec(hit[1])||[])[1]??'';const name=decodeXML((/<Name>([\s\S]*?)<\/Name>/.exec(blk)||[])[1]||'');
+  parts.push({ref,id,name,prefix:m?m[1]:null,num:m?Number(m[2]):null,start:i,end:i+refs[0][1].length})}
+ if(!parts.length)throw new Error('Не обнаружены размещённые компоненты с RefDes.');return parts}
+
+/* ---------- Текстовые строки схемы: надписи, поля рамки, ячейки таблиц ---------- */
+function extractTexts(text){const {from,close,cFrom,cTo}=bounds(text);const sch=text.slice(from,close);const owners=[];
+ const kinds=[['Shape','Надпись'],['Field','Поле рамки'],['Cell','Таблица']];
+ for(const [tag,label] of kinds){const re=new RegExp('<'+tag+'\\b([^>]*)>[\\s\\S]*?<\\/'+tag+'>','g');let m;while((m=re.exec(sch))!==null){const a=from+m.index;owners.push({a,b:a+m[0].length,label,id:(/\bId="([^"]*)"/.exec(m[1])||[])[1]??'',sheet:(/\bSheet="([^"]*)"/.exec(m[1])||[])[1]??''})}}
+ const lines=[];const re=/<TextLine>([\s\S]*?)<\/TextLine>/g;let m;
+ while((m=re.exec(sch))!==null){const s=from+m.index+'<TextLine>'.length,e=s+m[1].length;if(s>=cFrom&&s<cTo)continue;
+  const own=owners.filter(o=>o.a<=s&&s<o.b).sort((x,y)=>(x.b-x.a)-(y.b-y.a))[0];
+  lines.push({start:s,end:e,raw:m[1],kind:own?own.label:'Другое',ownerId:own?own.id:'',sheet:own?own.sheet:''})}
+ return lines}
+function readSheets(text){const map=new Map();const {from,close}=bounds(text);const sch=text.slice(from,close);for(const m of sch.matchAll(/<Sheet>\s*<Id>(\d+)<\/Id>\s*<Name>([\s\S]*?)<\/Name>/g))map.set(m[1],decodeXML(m[2]));return map}
+
+/* Поиск обозначений в строке. Слово = буквенный префикс + число, не окружённое буквами, цифрами и «_». */
+const WORD=/[\p{L}\p{N}_]/u;
+function findMentions(line,prefixes,known){const out=[];const re=/([A-Za-zА-ЯЁа-яё_]+)(\d+)/gu;let m;const s=line.raw;
+ while((m=re.exec(s))!==null){const a=m.index,b=a+m[0].length;const prev=s[a-1]||'',next=s[b]||'';
+  if(prev&&WORD.test(prev))continue; if(next&&WORD.test(next))continue; if(!prefixes.has(m[1]))continue;
+  // Сомнительно: часть составного слова (NE8FAH-C5, x.C5, #C5) или десятичная дробь (R1.5)
+  let doubt='';
+  if('-./#:\\'.includes(prev)&&prev){const before=s.slice(0,a-1);const w=/([\p{L}\p{N}_]+)$/u.exec(before);if(w&&!(prev==='-'&&known.has(w[1])))doubt='часть составного слова'}
+  if(!doubt&&(next==='.'||next===',')&&/\d/.test(s[b+1]||''))doubt='похоже на число';
+  out.push({ref:m[0],start:line.start+a,end:line.start+b,offInLine:a,doubt})}
+ return out}
+
+/* ---------- Загрузка файла ---------- */
+function loadFile(file){if(!file)return;sourceName=file.name;sourceBytes=null;valid=false;textOff=new Set();textOn=new Set();$('settings').hidden=true;$('results').hidden=true;$('fileInfo').className='muted small';$('fileInfo').textContent='Загрузка: '+file.name;
+ file.arrayBuffer().then(buffer=>{sourceBytes=buffer;sourceText=parseInput(buffer);xmlCheck(sourceText);discovered=extract(sourceText);textLines=extractTexts(sourceText);sheetNames=readSheets(sourceText);
+  renderGroups();renderUnnumbered();$('settings').hidden=false;$('results').hidden=false;
+  $('fileInfo').textContent=file.name+' — '+(file.size/1024/1024).toFixed(2)+' МБ; размещений: '+discovered.length+'; строк текста на схеме: '+textLines.length;compute()})
+ .catch(e=>{$('fileInfo').textContent='Ошибка: '+e.message;$('fileInfo').className='error small';alert(e.message)})}
+
+function renderGroups(){const counts=new Map();for(const p of discovered){if(p.prefix){if(!counts.has(p.prefix))counts.set(p.prefix,{parts:0,refs:new Set()});const o=counts.get(p.prefix);o.parts++;o.refs.add(p.num)}}
+ const sorted=[...counts.entries()].sort((a,b)=>a[0].localeCompare(b[0],'ru',{numeric:true}));
+ $('groups').innerHTML=sorted.map(([p,o])=>`<span class="chip"><label><input type="checkbox" class="prefix" data-prefix="${escapeHTML(p)}" ${p.toLowerCase()==='netport'?'':'checked'}> <strong>${escapeHTML(p)}</strong> <small>(${o.refs.size} / ${o.parts})</small></label></span>`).join('');
+ $('groups').querySelectorAll('input').forEach(c=>c.addEventListener('change',compute))}
+
+/* Обозначения, не подходящие под «префикс + число»: XTAL, #1.1-R1, R1A, 1R и т.п. */
+function classify(ref){if(!ref)return 'пустое';if(/^#/.test(ref))return 'иерархическое';if(/^[\p{L}_]+$/u.test(ref))return 'без номера';if(/^\d+$/.test(ref))return 'только номер';return 'иной формат'}
+let unnumberedList=[];
+function renderUnnumbered(){const map=new Map();for(const p of discovered){if(p.prefix)continue;if(!map.has(p.ref))map.set(p.ref,{ref:p.ref,type:classify(p.ref),parts:[],name:p.name});map.get(p.ref).parts.push(p.id)}
+ unnumberedList=[...map.values()].sort((a,b)=>a.ref.localeCompare(b.ref,'ru',{numeric:true}));$('unnumberedBox').hidden=!unnumberedList.length;
+ $('unnumbered').innerHTML=unnumberedList.map(u=>`<tr><td class="mono"><strong>${escapeHTML(u.ref||'(пусто)')}</strong></td><td><span class="tag warn">${u.type}</span></td><td>${u.parts.length}</td><td>${escapeHTML(u.name)}</td><td class="mono">${escapeHTML(u.parts.join(', '))}</td></tr>`).join('')}
+
+const sheetLabel=id=>id===''?'':(sheetNames.get(id)||('лист '+(Number(id)+1)));
+function whereLabel(t){return t.kind+(t.ownerId!==''?' #'+t.ownerId:'')+(t.sheet!==''?', '+sheetLabel(t.sheet):'')}
+
+/* ---------- Расчёт замен и предпросмотр ---------- */
+function compute(){valid=false;$('download').disabled=true;$('csv').disabled=true;
+ const selected=new Set([...document.querySelectorAll('.prefix:checked')].map(x=>x.dataset.prefix)),start=Number($('start').value),useText=$('textMode').checked;
+ try{if(!Number.isSafeInteger(start)||start<1||start>999999)throw new Error('Начальный номер должен быть целым числом от 1 до 999999.');
+  const buckets=new Map();for(const p of discovered){if(!p.prefix||!Number.isSafeInteger(p.num)||p.num<=0)continue;if(!buckets.has(p.prefix))buckets.set(p.prefix,new Map());const n=buckets.get(p.prefix);if(!n.has(p.num))n.set(p.num,[]);n.get(p.num).push(p)}
+  const replacements=[],results=[],renameMap=new Map();
+  for(const [prefix,numberMap] of buckets){if(!selected.has(prefix))continue;const nums=[...numberMap.keys()].sort((a,b)=>a-b);
+   for(let j=0;j<nums.length;j++){const oldNum=nums[j],newNum=start+j;if(newNum===oldNum)continue;const oldRef=prefix+oldNum,newRef=prefix+newNum;
+    for(const p of numberMap.get(oldNum))replacements.push({start:p.start,end:p.end,newRef});renameMap.set(oldRef,newRef);results.push({prefix,oldRef,newRef,count:numberMap.get(oldNum).length})}}
+  // Упоминания в текстах: ищем все обозначения групп, меняем только переименованные
+  const known=new Set(discovered.map(p=>p.ref));const prefixes=new Set(buckets.keys());const tr=[];let mentionsTotal=0;
+  for(const line of textLines){for(const m of findMentions(line,prefixes,known)){mentionsTotal++;const newRef=renameMap.get(m.ref);const exists=known.has(m.ref);
+    if(!newRef&&exists)continue; // обозначение существует и не меняется
+    const r={...m,line,newRef:newRef||'',status:'',apply:false};
+    if(!exists){r.status='нет в схеме';}
+    else{r.apply=useText&&(m.doubt?textOn.has(m.start):!textOff.has(m.start));r.status=(m.doubt?'сомнительно ('+m.doubt+'), ':'')+(r.apply?'будет заменено':'пропущено')}
+    tr.push(r)}}
+  for(const r of tr)if(r.apply)replacements.push({start:r.start,end:r.end,newRef:r.newRef});
+  // Замены выполняются по смещениям с конца текста: каскадного переименования по совпадению строк нет
+  replacements.sort((a,b)=>b.start-a.start);for(let i=1;i<replacements.length;i++)if(replacements[i].end>replacements[i-1].start)throw new Error('Перекрывающиеся замены.');
+  let result=sourceText;for(const x of replacements)result=result.slice(0,x.start)+x.newRef+result.slice(x.end);xmlCheck(result);
+  // Контроль: число секций, состав секций каждого обозначения, уникальность
+  const post=extract(result);if(post.length!==discovered.length)throw new Error('После изменения число секций изменилось.');
+  const groupKey=list=>{const g=new Map();for(const p of list){if(!g.has(p.ref))g.set(p.ref,[]);g.get(p.ref).push(p.id)}return [...g.values()].map(v=>v.join(',')).sort().join('|')};
+  if(groupKey(discovered)!==groupKey(post))throw new Error('Коллизия обозначений: изменился состав секций компонентов.');
+  if(extractTexts(result).length!==textLines.length)throw new Error('После изменения число строк текста изменилось.');
+  outputText=result;changes=results;textResults=tr;valid=true;$('download').disabled=false;$('csv').disabled=false;
+  const applied=tr.filter(r=>r.apply).length;
+  $('stats').innerHTML=`<div><strong>${discovered.length}</strong><span>размещений</span></div><div><strong>${selected.size}</strong><span>выбранных групп</span></div><div><strong>${results.length}</strong><span>переименованных обозначений</span></div><div><strong>${replacements.length-applied}</strong><span>изменённых секций</span></div><div><strong>${applied}</strong><span>замен в надписях</span></div><div><strong>${unnumberedList.length}</strong><span>без номера / нераспознанных</span></div>`;
+  const doubt=tr.filter(r=>r.line&&r.doubt&&!r.apply&&r.newRef).length,missing=tr.filter(r=>r.status==='нет в схеме').length;
+  $('message').className=results.length||missing?'warn':'ok';
+  $('message').textContent=results.length?'Предпросмотр. Изменённые обозначения перечислены ниже.'+(doubt?' Есть сомнительные упоминания в надписях — проверьте их вручную.':''):'Пропусков для выбранных групп нет либо номера уже последовательны.'+(missing?' В надписях есть ссылки на отсутствующие обозначения.':'');
+  $('changes').innerHTML=results.length?results.map(x=>`<tr><td>${escapeHTML(x.prefix)}</td><td>${escapeHTML(x.oldRef)}</td><td><strong>${escapeHTML(x.newRef)}</strong></td><td>${x.count}</td></tr>`).join(''):'<tr><td colspan="4">Изменений не требуется</td></tr>';
+  $('textInfo').textContent=`Строк текста: ${textLines.length}; найдено упоминаний обозначений: ${mentionsTotal}; к замене: ${applied}`+(useText?'.':'. Обновление надписей выключено.');
+  renderTexts(tr,useText)}
+ catch(e){$('message').className='error';$('message').textContent='Ошибка: '+e.message;$('changes').innerHTML='';$('stats').innerHTML='';$('texts').innerHTML=''}}
+
+function renderTexts(tr,useText){
+ if(!tr.length){$('texts').innerHTML='<tr><td colspan="6">Упоминаний переименованных или отсутствующих обозначений нет</td></tr>';return}
+ $('texts').innerHTML=tr.map(r=>{const s=r.line.raw,a=r.offInLine,b=a+r.ref.length;const ctx=escapeHTML(decodeXML(s.slice(0,a)))+'<mark>'+escapeHTML(r.ref)+'</mark>'+escapeHTML(decodeXML(s.slice(b)));
+  const can=!!r.newRef&&useText;const cls=r.status==='нет в схеме'?'tag warn':(r.doubt?'tag warn':'tag');
+  return `<tr class="${r.apply?'':'off'}"><td>${r.newRef?`<input type="checkbox" class="tmen" data-off="${r.start}" data-doubt="${r.doubt?1:0}" ${r.apply?'checked':''} ${can?'':'disabled'}>`:''}</td><td class="small">${escapeHTML(whereLabel(r.line))}</td><td class="mono">${escapeHTML(r.ref)}</td><td class="mono"><strong>${escapeHTML(r.newRef||'—')}</strong></td><td class="mono small">${ctx}</td><td><span class="${cls}">${escapeHTML(r.status)}</span></td></tr>`}).join('');
+ $('texts').querySelectorAll('.tmen').forEach(c=>c.addEventListener('change',()=>{const k=Number(c.dataset.off);if(c.dataset.doubt==='1'){c.checked?textOn.add(k):textOn.delete(k)}else{c.checked?textOff.delete(k):textOff.add(k)}compute()}))}
+
+/* ---------- Скачивание ---------- */
 function downloadBlob(bytes,name,type){const url=URL.createObjectURL(new Blob([bytes],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000)}
+const csvCell=v=>{v=String(v??'');return /[;"\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
 $('download').onclick=()=>{if(!valid)return;let bytes;if(originalEncoding==='utf-16le'||originalEncoding==='utf-16be')bytes=utf16Encode(outputText,originalEncoding==='utf-16le');else bytes=new TextEncoder().encode((bom?'\ufeff':'')+outputText);downloadBlob(bytes,sourceName.replace(/\.dchxml$/i,'')+'_RefDes_fixed.dchxml','application/xml')};
-$('csv').onclick=()=>{if(!valid)return;const lines=['Группа;Старое обозначение;Новое обозначение;Число секций',...changes.map(x=>[x.prefix,x.oldRef,x.newRef,x.count].join(';'))];downloadBlob(new TextEncoder().encode('\ufeff'+lines.join('\r\n')),sourceName.replace(/\.dchxml$/i,'')+'_RefDes_changes.csv','text/csv;charset=utf-8')};
-$('start').addEventListener('input',()=>{if(sourceBytes)compute()});$('selectAll').onclick=()=>{document.querySelectorAll('.prefix').forEach(x=>x.checked=x.dataset.prefix.toLowerCase()!=='netport');compute()};$('selectNone').onclick=()=>{document.querySelectorAll('.prefix').forEach(x=>x.checked=false);compute()};$('pick').onclick=e=>{e.stopPropagation();$('file').click()};$('drop').onclick=()=>$('file').click();$('file').addEventListener('change',e=>loadFile(e.target.files[0]));['dragenter','dragover'].forEach(t=>$('drop').addEventListener(t,e=>{e.preventDefault();$('drop').classList.add('over')}));['dragleave','drop'].forEach(t=>$('drop').addEventListener(t,e=>{e.preventDefault();$('drop').classList.remove('over')}));$('drop').addEventListener('drop',e=>loadFile(e.dataTransfer.files[0]));
+$('csv').onclick=()=>{if(!valid)return;const rows=[['Объект','Группа','Было','Станет','Число секций','Где','Строка надписи','Статус']];
+ for(const x of changes)rows.push(['RefDes',x.prefix,x.oldRef,x.newRef,x.count,'','','переименовано']);
+ for(const r of textResults)rows.push(['Надпись',(REF_RE.exec(r.ref)||[])[1]||'',r.ref,r.apply?r.newRef:'','',whereLabel(r.line),decodeXML(r.line.raw),r.status.replace('будет заменено','заменено')]);
+ for(const u of unnumberedList)rows.push(['Без номера','',u.ref,'',u.parts.length,'Part Id '+u.parts.join(', '),u.name,u.type]);
+ downloadBlob(new TextEncoder().encode('\ufeff'+rows.map(r=>r.map(csvCell).join(';')).join('\r\n')),sourceName.replace(/\.dchxml$/i,'')+'_RefDes_changes.csv','text/csv;charset=utf-8')};
+
+/* ---------- Управление ---------- */
+$('start').addEventListener('input',()=>{if(sourceBytes)compute()});$('textMode').addEventListener('change',()=>{if(sourceBytes)compute()});
+$('selectAll').onclick=()=>{document.querySelectorAll('.prefix').forEach(x=>x.checked=x.dataset.prefix.toLowerCase()!=='netport');compute()};
+$('selectNone').onclick=()=>{document.querySelectorAll('.prefix').forEach(x=>x.checked=false);compute()};
+$('textAll').onclick=()=>{textOff=new Set();for(const r of textResults)if(r.newRef&&r.doubt)textOn.add(r.start);compute()};
+$('textNone').onclick=()=>{textOn=new Set();for(const r of textResults)if(r.newRef)textOff.add(r.start);compute()};
+$('pick').onclick=e=>{e.stopPropagation();$('file').click()};$('drop').onclick=()=>$('file').click();$('file').addEventListener('change',e=>loadFile(e.target.files[0]));
+['dragenter','dragover'].forEach(t=>$('drop').addEventListener(t,e=>{e.preventDefault();$('drop').classList.add('over')}));
+['dragleave','drop'].forEach(t=>$('drop').addEventListener(t,e=>{e.preventDefault();$('drop').classList.remove('over')}));
+$('drop').addEventListener('drop',e=>loadFile(e.dataTransfer.files[0]));
 </script></body></html>
