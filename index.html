@@ -81,8 +81,8 @@ const decodeXML=s=>s.replace(/&(#x[0-9a-fA-F]+|#[0-9]+|amp|lt|gt|quot|apos);/g,(
 const REF_RE=/^([A-Za-zА-ЯЁа-яё_]+)(\d+)$/u;
 
 /* ---------- Тема: светлая по умолчанию, выбор запоминается ---------- */
-function setTheme(t){document.documentElement.dataset.theme=t;$('theme').textContent=t==='dark'?'Светлая тема':'Тёмная тема';try{localStorage.setItem('refdesRepairTheme',t)}catch{}}
-try{setTheme(localStorage.getItem('refdesRepairTheme')==='dark'?'dark':'light')}catch{setTheme('light')}
+function setTheme(t){document.documentElement.dataset.theme=t;$('theme').textContent=t==='dark'?'Светлая тема':'Тёмная тема';try{localStorage.setItem('refdesRenumberatorTheme',t)}catch{}}
+try{setTheme(localStorage.getItem('refdesRenumberatorTheme')==='dark'?'dark':'light')}catch{setTheme('light')}
 $('theme').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
 
 /* ---------- Кодировка: UTF-8 (с BOM или без) и UTF-16 с BOM ---------- */
